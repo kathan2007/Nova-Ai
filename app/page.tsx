@@ -297,7 +297,7 @@ export default function Home() {
                 boxShadow: "0 0 30px rgba(0, 212, 255, 0.2)",
               }}
             >
-              INITIALIZE NOVA ARC
+              NOVA ARC
             </button>
           </motion.div>
         ) : (
