@@ -6,10 +6,7 @@ import { OrbState } from "../components/NovaOrb";
 import { sounds, startAmbient } from "./audioEngine";
 import { detectIntent, executeClientCommand } from "./intentDetector";
 
-interface UseNovaOptions {
-  groqApiKey: string;
-  geminiApiKey?: string;
-}
+// Removed UseNovaOptions as keys are handled server-side
 
 const WAKE_WORDS = ["nova arc", "nova arc,", "nova arc.", "nova", "nova,", "nova."];
 
@@ -415,7 +412,7 @@ export function useNova() {
     pendingRef.current = false;
     setOrbState("idle");
     setStatusText("STANDBY");
-  }, [groqApiKey, addMessage, updateLastAssistantMessage, speak]);
+  }, [addMessage, updateLastAssistantMessage, speak]);
 
   // ─── Voice recognition ──────────────────────────────────────────────────
   const startRecognition = useCallback(() => {

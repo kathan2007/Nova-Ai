@@ -301,7 +301,7 @@ export default function Home() {
             </button>
           </motion.div>
         ) : (
-          <NovaApp key="app" groqKey={GROQ_API_KEY} geminiKey={GEMINI_API_KEY} />
+          <NovaApp key="app" />
         )}
       </AnimatePresence>
     </main>
