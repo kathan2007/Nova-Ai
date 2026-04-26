@@ -13,25 +13,22 @@ import { useNova } from "./lib/useNova";
 const StarfieldBackground = dynamic(() => import("./components/StarfieldBackground"), { ssr: false });
 
 interface NovaAppProps {
-  groqKey: string;
-  geminiKey: string;
 }
 
-function NovaApp({ groqKey, geminiKey }: NovaAppProps) {
+function NovaApp({}: NovaAppProps) {
   const {
-    messages,
-    orbState,
-    isListening,
-    isThinking,
-    statusText,
     wakeWordActive,
     sendMessage,
     toggleListening,
     clearHistory,
-  } = useNova({ groqApiKey: groqKey, geminiApiKey: geminiKey });
+    statusText,
+    isListening,
+    messages,
+    orbState,
+    isThinking,
+  } = useNova();
 
   return (
-// ... existing code ...
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
@@ -249,10 +246,6 @@ function NovaApp({ groqKey, geminiKey }: NovaAppProps) {
 
 export default function Home() {
   const [booted, setBooted] = useState(false);
-
-  // API keys from .env.local or production variables
-  const GROQ_API_KEY = process.env.NEXT_PUBLIC_GROQ_API_KEY || "";
-  const GEMINI_API_KEY = process.env.NEXT_PUBLIC_GEMINI_API_KEY || "";
 
   return (
     <main style={{ width: "100vw", height: "100vh", overflow: "hidden", background: "#060f1e", position: "relative" }}>

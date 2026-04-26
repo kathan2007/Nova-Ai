@@ -25,7 +25,7 @@ declare global {
   }
 }
 
-export function useNova({ groqApiKey, geminiApiKey }: UseNovaOptions) {
+export function useNova() {
   const [messages, setMessages] = useState<Message[]>(() => {
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem("nova_chat_history");
@@ -282,8 +282,6 @@ export function useNova({ groqApiKey, geminiApiKey }: UseNovaOptions) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           messages: conversationRef.current.slice(-20),
-          apiKey: groqApiKey,
-          geminiApiKey,
           file: fileData,
         }),
       });
