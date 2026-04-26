@@ -56,6 +56,7 @@ export function useNova() {
   const [wakeWordActive, setWakeWordActive] = useState(false);
 
   const recognitionRef = useRef<SpeechRecognition | null>(null);
+  const voiceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const conversationRef = useRef<{ role: "user" | "assistant"; content: string }[]>([]);
   const pendingRef = useRef(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -432,6 +433,7 @@ export function useNova() {
 
     let wakeDetected = false;
     let lastFinal = "";
+    let accumulatedCommand = "";
 
     recognition.onresult = (event: SpeechRecognitionEvent) => {
       // If Nova is currently speaking or just finished (echo duration), ignore EVERYTHING
@@ -441,52 +443,63 @@ export function useNova() {
       let final = "";
 
       for (let i = event.resultIndex; i < event.results.length; i++) {
-        // Double check lockout inside the chunk loop to catch late browser deliveries
-        if (isSpeakingRef.current) continue;
-        
-        const t = event.results[i][0].transcript.trim();
-        if (event.results[i].isFinal) final += t + " ";
+        const result = event.results[i];
+        const t = result[0].transcript;
+        if (result.isFinal) final += t;
         else interim += t;
       }
 
       const combined = (final + interim).toLowerCase();
 
-      // Check for sleep command to end continuous session (Added "bye", "goodbye", "alvida")
+      // Check for sleep command
       const sleepTriggers = ["go to sleep", "stop listening", "nova sleep", "bye", "goodbye", "alvida"];
       if (wakeDetected && sleepTriggers.some(t => combined.includes(t))) {
         wakeDetected = false;
         setWakeWordActive(false);
         setStatusText("STANDBY");
         lastFinal = final;
+        if (voiceTimerRef.current) clearTimeout(voiceTimerRef.current);
         return;
       }
 
+      // Wake word detection
       if (!wakeDetected && WAKE_WORDS.some(w => combined.includes(w))) {
         wakeDetected = true;
         setWakeWordActive(true);
         sounds.wakeWord();
         setStatusText("NOVA ARC ACTIVATED");
-        lastFinal = final; // Ignore anything said before waking up
+        lastFinal = final;
         return;
       }
 
       if (wakeDetected && final && final !== lastFinal) {
-        // Extract only the newly finalized speech after the previous sentence
+        // Calculate what's actually new since we last updated lastFinal
         let newText = final;
         if (final.startsWith(lastFinal)) {
           newText = final.substring(lastFinal.length).trim();
         }
         
-        lastFinal = final;
+        // Remove wake words from the command
         let command = newText;
         WAKE_WORDS.forEach(w => {
           command = command.replace(new RegExp(w, "gi"), "").trim();
         });
         command = command.replace(/^[,.\s]+/, "").trim();
 
-        if (command.length > 2 && !pendingRef.current) {
-          // Keep wakeDetected true for continuous conversation
-          sendMessage(command);
+        if (command.length > 1) {
+          accumulatedCommand = command;
+          setStatusText(`HEARING: "${command}"...`);
+
+          // DEBOUNCE: Wait for 1.2 seconds of silence before sending
+          // This allows users to say full sentences on mobile where 'isFinal' triggers per word.
+          if (voiceTimerRef.current) clearTimeout(voiceTimerRef.current);
+          voiceTimerRef.current = setTimeout(() => {
+            if (accumulatedCommand && !pendingRef.current) {
+              sendMessage(accumulatedCommand);
+              lastFinal = final; // Mark this batch as processed
+              accumulatedCommand = "";
+            }
+          }, 1200); 
         }
       }
     };
@@ -553,6 +566,7 @@ export function useNova() {
   useEffect(() => {
     return () => {
       recognitionRef.current?.stop();
+      if (voiceTimerRef.current) clearTimeout(voiceTimerRef.current);
       audioRef.current?.pause();
       if (typeof window !== "undefined") window.speechSynthesis?.cancel();
     };

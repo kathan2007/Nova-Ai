@@ -282,7 +282,7 @@ export default function Home() {
                 textShadow: "0 0 20px rgba(0, 212, 255, 0.8)",
               }}
             >
-              SYSTEM STANDBY
+              NOVA ARC
             </motion.div>
             
             <button
