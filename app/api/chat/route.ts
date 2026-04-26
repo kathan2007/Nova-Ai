@@ -148,11 +148,15 @@ async function handleGeminiRequest(geminiApiKey: string, messages: any[], file: 
         });
       }
 
-      const result = await model.generateContentStream([
+      // Pass history + latest message
+      const chatContext = [
         { role: "user", parts: [{ text: SYSTEM_PROMPT }] },
+        { role: "model", parts: [{ text: "Understood. I am Nova, your AI assistant." }] },
         ...messagesToGemini.slice(0, -1),
         { role: "user", parts: contentParts }
-      ]);
+      ];
+
+      const result = await model.generateContentStream(chatContext as any);
 
       const encoder = new TextEncoder();
       const stream = new ReadableStream({
