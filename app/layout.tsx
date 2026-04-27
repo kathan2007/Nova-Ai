@@ -5,6 +5,9 @@ export const metadata: Metadata = {
   title: "Nova Arc — Futuristic AI Assistant",
   description: "Nova Arc is a Jarvis-style futuristic AI assistant with real-time voice interaction, cyberpunk interface, and advanced multi-tool intelligence.",
   keywords: ["AI assistant", "voice AI", "Nova Arc", "Jarvis", "cyberpunk AI"],
+  icons: {
+    icon: "/nova-logo.png",
+  },
   openGraph: {
     title: "Nova Arc — Your Futuristic AI Assistant",
     description: "Real-time voice interaction, cyberpunk UI, and intelligent multi-tool AI.",
